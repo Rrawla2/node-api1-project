@@ -45,12 +45,13 @@ server.get("/api/users/:id", (req, res) => {
 // Add a user
 server.post("/api/users", (req, res) => {
     const userInfo = req.body;
-    userInfo.id = shortid.generate();
+    
 
     db.insert(userInfo)
         .then(user => {
             if (userInfo.name && userInfo.bio) {
-                res.status(201).json(user)
+                userInfo.id = shortid.generate();
+                res.status(201).json(userInfo)
             } else {
                 res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
             }
@@ -89,11 +90,11 @@ server.put("/api/users/:id", (req, res) => {
                 res.status(200).json(updates)
             } else if (!updates.name || !updates.bio) {
                 res.status(400).json({ message: "Please provide name and bio for the user." })
-            } else if (!user) {
-                res.status(404).json({ message: "The user with the specified ID does not exist." })
             } else {
-                res.status(500).json({ errorMessage: "The user information could not be modified." })
+                res.status(404).json({ message: "The user with the specified ID does not exist." })
             }
-            
+        })
+        .catch(err => {
+            res.status(500).json({ errorMessage: "The user information could not be modified." })
         })
 })
